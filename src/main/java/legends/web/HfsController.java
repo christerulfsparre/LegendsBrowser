@@ -16,10 +16,12 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 
 import legends.helper.EventHelper;
+import legends.helper.Filter;
 import legends.helper.HfStatHelper;
 import legends.helper.Templates;
 import legends.model.HistoricalFigure;
 import legends.model.World;
+import legends.model.events.HfDiedEvent;
 import legends.model.events.HfDoesInteractionEvent;
 import legends.model.events.basic.Filters;
 import legends.web.basic.Controller;
@@ -30,61 +32,46 @@ public class HfsController {
 
 	@RequestMapping("/hfs")
 	public Template hfs(VelocityContext context) {
-		boolean leader = context.containsKey("leader");
-		boolean deity = context.containsKey("deity");
-		boolean force = context.containsKey("force");
-		boolean vampire = context.containsKey("vampire");
-		boolean werebeast = context.containsKey("werebeast");
-		boolean necromancer = context.containsKey("necromancer");
-		boolean alive = context.containsKey("alive");
-		boolean ghost = context.containsKey("ghost");
-		boolean adventurer = context.containsKey("adventurer");
-
 		Collection<HistoricalFigure> historicalFigures = World.getHistoricalFigures();
 		context.put("races", new TreeSet<String>(historicalFigures.stream().map(hf -> hf.getRace() != null ? hf.getRace() : "UNKNOWN").collect(Collectors.toList())));
 
-		String race = (String)context.get("race");
 		String sort = (String)context.get("sort");
 
-		if (leader || deity || force || vampire || werebeast || necromancer || alive || ghost || adventurer || (race != null && !race.equals(""))) {
-			historicalFigures = historicalFigures.stream().filter(hf -> {
-				if (leader && !hf.isLeader())
-					return false;
-				if (deity && !hf.isDeity())
-					return false;
-				if (force && !hf.isForce())
-					return false;
-				if (vampire && !hf.isVampire())
-					return false;
-				if (werebeast && !hf.isWerebeast())
-					return false;
-				if (necromancer && !hf.isNecromancer())
-					return false;
-				if (alive && hf.getDeathYear() != -1)
-					return false;
-				if (ghost && !hf.isGhost())
-					return false;
-				if (adventurer && !hf.isAdventurer())
-					return false;
-				
-				if (race != null && !race.equals("")) {
-					if (hf.getRace() == null) {
-						if (!race.equals("UNKNOWN")) {
-							return false;
-						}
-					} else if (!hf.getRace().equals(race)) {
-						return false;
-					}
-				}
-				return true;
-			}).collect(Collectors.toList());
-		}
+		Filter<HistoricalFigure> filter = new Filter<HistoricalFigure>();
+
+		String race = (String)context.get("race");
+		if(race != null && !race.isEmpty()) filter.add(hf -> (hf.getRace() == null ? "UNKNOWN" : hf.getRace()).equals(race) );
+		if(context.containsKey("leader")) filter.add(hf -> hf.isLeader());
+		if(context.containsKey("deity")) filter.add(hf -> hf.isDeity());
+		if(context.containsKey("force")) filter.add(hf -> hf.isForce());
+		if(context.containsKey("vampire")) filter.add(hf -> hf.isVampire());
+		if(context.containsKey("werebeast")) filter.add(hf -> hf.isWerebeast());
+		if(context.containsKey("necromancer")) filter.add(hf -> hf.isNecromancer());
+		if(context.containsKey("alive")) filter.add(hf -> hf.getDeathYear() == -1);
+		if(context.containsKey("ghost")) filter.add(hf -> hf.isGhost());
+		if(context.containsKey("adventurer")) filter.add(hf -> hf.isAdventurer());
+
+		historicalFigures = filter.on(historicalFigures);
 
 		if (sort != null && !sort.equals("")) {
-			HashMap<Integer, Integer> kills = HfStatHelper.getAllHistoricalFigureKills();
-			historicalFigures = historicalFigures.stream().sorted(
-				(f1, f2) -> kills.getOrDefault(f2.getId(), 0) - kills.getOrDefault(f1.getId(), 0)
-			).collect(Collectors.toList());
+
+			if (sort.equals("kills")) {
+				HashMap<Integer, ArrayList<HfDiedEvent>> kills = HfStatHelper.getAllHistoricalFigureKills();
+				ArrayList<HfDiedEvent> empty = new ArrayList<HfDiedEvent>();
+				historicalFigures = historicalFigures.stream().sorted(
+					(f1, f2) -> kills.getOrDefault(f2.getId(), empty).size() - kills.getOrDefault(f1.getId(), empty).size()
+				).collect(Collectors.toList());
+			}
+			else if(sort.equals("youngest")) {
+				historicalFigures = historicalFigures.stream().sorted(
+					(hf1, hf2) -> hf1.getAge() - hf2.getAge()
+				).collect(Collectors.toList());
+			}
+			else if(sort.equals("oldest")) {
+				historicalFigures = historicalFigures.stream().sorted(
+					(hf1, hf2) -> hf2.getAge() - hf1.getAge()
+				).collect(Collectors.toList());
+			}
 		}
 
 		context.put("elements", historicalFigures);

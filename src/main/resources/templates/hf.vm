@@ -19,7 +19,6 @@
 #if($hf.activeInteraction)
 	<dt>Active Interactions</dt><dd>$hf.activeInteraction</dd>
 #end
-	<dt>Kills</dt><dd>$kills</dd>
 </dl>
 
 #if($family.members.size()>1)
@@ -133,6 +132,17 @@
 #foreach( $l in $hf.entityFormerSquadLinks )
 	#set ($entity = $World.getEntity($l.entityId))
 	<li>$l.getPosition($hf) of squad $l.squadId of $entity.link ($l.startYear - $l.endYear)</li>
+#end
+</ul>
+</div>
+#end
+
+#if($kills.size()>0)
+<div class="col-md-4">
+<h4>Kills</h4>
+<ul>
+#foreach( $key in $kills.keySet() )
+	<li>$key: $kills.get($key)</li>
 #end
 </ul>
 </div>

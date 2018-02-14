@@ -476,6 +476,10 @@ public class HistoricalFigure extends AbstractObject {
 		return sex == 1 || "MALE".equals(caste);
 	}
 
+	public int getAge() {
+		return (getDeathYear() != -1 ? getDeathYear() : World.getEndYear()) - getBirthYear();
+	}
+
 	public void process() {
 		Stream.concat(entityFormerPositionLinks.stream(), entityPositionLinks.stream()).forEach(l -> {
 			World.getEntity(l.getEntityId()).getHfPositions().put(l, id);

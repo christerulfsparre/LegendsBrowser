@@ -26,7 +26,9 @@
 			<div class="select form-group">
 				<select class="form-control" name="sort">
 					<option class="text-muted" value="">Sort - Default</option>
-					<option value="kills" #if("kills" == $sort) selected #end>kills</option>
+					<option value="kills" #if("kills" == $sort) selected #end>by number of kills</option>
+					<option value="youngest" #if("youngest" == $sort) selected #end>by youngest</option>
+					<option value="oldest" #if("oldest" == $sort) selected #end>by oldest</option>
 				</select>
 			</div>
 			<button type="submit" class="btn btn-primary">Refresh</button>
