@@ -142,7 +142,7 @@
 <h4>Kills</h4>
 <ul>
 #foreach( $key in $kills.keySet() )
-	<li>$key: $kills.get($key)</li>
+	<li>$key: $kills.get($key).size()</li>
 #end
 </ul>
 </div>

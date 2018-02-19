@@ -19,14 +19,23 @@
     	<table class="table table-hover">
     		<thead><tr>
     			<th>Title</th>
-   				<th></th>
+					<th></th>
+					#if($type == "war" || $type == "battle")
+						<th>Kills</th>
+					#end
     			<th>Collections</th>
     			<th>Events</th>
 			</tr></thead>
     	#foreach($event in $list)
     		<tr>
     			<td>In $event.startYear, $event.link</td>
-    			<td>#if($event.warEventCol)$World.getHistoricalEventCollection($event.warEventCol).link#end</td>
+					<td>#if($event.warEventCol)$World.getHistoricalEventCollection($event.warEventCol).link#end</td>
+					#if($type == "war")
+						<td>#if($war.containsKey($event.id))$war.get($event.id).size()#else 0#end</td>
+					#end
+					#if($type == "battle")
+						<td>#if($battle.containsKey($event.id))$battle.get($event.id).size()#else 0#end</td>
+					#end
     			<td>$event.eventCols.size()</td>
     			<td>$event.events.size()</td>
 			</tr>

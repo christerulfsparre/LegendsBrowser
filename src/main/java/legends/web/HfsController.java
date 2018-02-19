@@ -17,7 +17,7 @@ import org.apache.velocity.VelocityContext;
 
 import legends.helper.EventHelper;
 import legends.helper.Filter;
-import legends.helper.HfStatHelper;
+import legends.helper.StatHelper;
 import legends.helper.Templates;
 import legends.model.HistoricalFigure;
 import legends.model.World;
@@ -51,12 +51,12 @@ public class HfsController {
 		if(context.containsKey("ghost")) filter.add(hf -> hf.isGhost());
 		if(context.containsKey("adventurer")) filter.add(hf -> hf.isAdventurer());
 
-		historicalFigures = filter.on(historicalFigures);
+		historicalFigures = filter.apply(historicalFigures);
 
 		if (sort != null && !sort.equals("")) {
 
 			if (sort.equals("kills")) {
-				HashMap<Integer, ArrayList<HfDiedEvent>> kills = HfStatHelper.getAllHistoricalFigureKills();
+				HashMap<Integer, Collection<HfDiedEvent>> kills = StatHelper.getAllHistoricalFigureKills();
 				ArrayList<HfDiedEvent> empty = new ArrayList<HfDiedEvent>();
 				historicalFigures = historicalFigures.stream().sorted(
 					(f1, f2) -> kills.getOrDefault(f2.getId(), empty).size() - kills.getOrDefault(f1.getId(), empty).size()
@@ -84,7 +84,7 @@ public class HfsController {
 		HistoricalFigure hf = World.getHistoricalFigure(id);
 		HistoricalFigure.setContext(hf);
 
-		context.put("kills", HfStatHelper.getHistoricalFigureKills(hf));
+		context.put("kills", StatHelper.getHistoricalFigureKills(hf));
 		context.put("hf", hf);
 		context.put("family", new Family(hf, false));
 

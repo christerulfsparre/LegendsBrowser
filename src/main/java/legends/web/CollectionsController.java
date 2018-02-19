@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 
+import legends.helper.StatHelper;
 import legends.helper.Templates;
 import legends.model.World;
 import legends.model.collections.basic.EventCollection;
@@ -22,7 +23,8 @@ public class CollectionsController {
 				.collect(Collectors.groupingBy(EventCollection::getType));
 		context.put("events", collections);
 		context.put("types", collections.keySet());
-
+		context.put("war", StatHelper.getWarCollectionKills(collections.get("war")));
+		context.put("battle", StatHelper.getBattleCollectionKills(collections.get("battle")));
 		return Templates.get("collections.vm");
 	}
 

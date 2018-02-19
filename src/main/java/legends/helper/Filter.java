@@ -29,7 +29,7 @@ public class Filter<T> {
         };
     }
 
-    public Collection<T> on(Collection<T> collection) {
+    public Collection<T> apply(Collection<T> collection) {
         if(this.empty()) {
             return collection;
         } else {
